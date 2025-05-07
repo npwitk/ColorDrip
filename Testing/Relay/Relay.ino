@@ -21,7 +21,8 @@ void loop() {
 
 void pumpMl(float ml) {
   float seconds = ml / 1.1111111; // flowrate (ml/s)
-  unsigned long milliseconds = (seconds * 1000) - 3000;
+  int errorRate = (ml < 20) ? 1000 : 3000;
+  unsigned long milliseconds = (seconds * 1000) - errorRate;
 
   Serial.print("Pumping for ");
   Serial.print(seconds);
