@@ -1,4 +1,4 @@
-int relay = 7;  
+int relay = 8;  
 
 void setup() {
   pinMode(relay, OUTPUT); 
