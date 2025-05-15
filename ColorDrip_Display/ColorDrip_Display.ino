@@ -1,7 +1,14 @@
+#include <LiquidCrystal.h>
+
 int relayPins[] = {7, 8, 9, 10}; // Pump C, M, Y, K
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // RS, E, D4, D5, D6, D7
 
 void setup() {
   Serial.begin(9600);
+  lcd.begin(16, 2);
+  lcd.setCursor(0, 0);
+  lcd.print("ColorDrip Ready");
+
   for (int i = 0; i < 4; i++) {
     pinMode(relayPins[i], OUTPUT);
   }
@@ -19,10 +26,12 @@ void loop() {
 
     if (input.startsWith("hex ")) {
       String hexCode = input.substring(4);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Mixing from HEX");
       mixFromHex(hexCode, 30.0); // total volume = 30 ml
     } 
     else if (input.indexOf(',') > 0) {
-      // RGB format: e.g., 255,0,128
       int firstComma = input.indexOf(',');
       int secondComma = input.indexOf(',', firstComma + 1);
 
@@ -32,6 +41,9 @@ void loop() {
         int b = input.substring(secondComma + 1).toInt();
 
         if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Mixing RGB");
           mixFromRGB(r, g, b, 30.0);
         } else {
           Serial.println("Invalid RGB values. Use 0–255 for R,G,B.");
@@ -47,6 +59,15 @@ void loop() {
         float ml = input.substring(spaceIndex + 1).toFloat();
 
         if ((pumpNumber >= 1 && pumpNumber <= 4) && ml > 0) {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Manual Pumping");
+          lcd.setCursor(0, 1);
+          lcd.print("Pump ");
+          lcd.print(pumpNumber);
+          lcd.print(": ");
+          lcd.print(ml);
+          lcd.print("ml");
           pumpMl(pumpNumber, ml);
           Serial.println("Pumping complete.");
         } else {
@@ -123,6 +144,19 @@ void mixFromRGB(int r, int g, int b, float totalMl) {
   Serial.print("Magenta: "); Serial.println(mMl);
   Serial.print("Yellow: "); Serial.println(yMl);
   Serial.print("Black: "); Serial.println(kMl);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("C:");
+  lcd.print((int)cMl);
+  lcd.print(" M:");
+  lcd.print((int)mMl);
+
+  lcd.setCursor(0, 1);
+  lcd.print("Y:");
+  lcd.print((int)yMl);
+  lcd.print(" K:");
+  lcd.print((int)kMl);
 
   if (cMl > 0) pumpMl(1, cMl);
   if (mMl > 0) pumpMl(2, mMl);
